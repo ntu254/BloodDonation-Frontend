@@ -5,13 +5,13 @@ import toast from 'react-hot-toast';
 import bloodComponentService from '../../services/bloodComponentService'; //
 import Button from '../../components/common/Button'; //
 import LoadingSpinner from '../../components/common/LoadingSpinner'; //
-// import BloodComponentFormModal from '../../components/admin/BloodComponentFormModal'; // Component này cần được tạo
+import BloodComponentFormModal from '../../components/admin/BloodComponentFormModal'; // Import the modal
 
 const AdminBloodComponentPage = () => {
     const [components, setComponents] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
-    // const [isModalOpen, setIsModalOpen] = useState(false);
-    // const [editingComponent, setEditingComponent] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false); // State for modal
+    const [editingComponent, setEditingComponent] = useState(null); // State for component being edited
 
     const fetchComponents = useCallback(async () => {
         setIsLoading(true);
@@ -28,6 +28,21 @@ const AdminBloodComponentPage = () => {
     useEffect(() => {
         fetchComponents();
     }, [fetchComponents]);
+
+    const handleOpenModal = (component = null) => {
+        setEditingComponent(component);
+        setIsModalOpen(true);
+    };
+
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+        setEditingComponent(null);
+    };
+
+    const handleSaveSuccess = () => {
+        fetchComponents();
+        handleCloseModal();
+    };
 
     const handleDelete = async (id, name) => {
         if (window.confirm(`Bạn có chắc chắn muốn xóa thành phần máu "${name}" (ID: ${id}) không?`)) {
@@ -50,7 +65,7 @@ const AdminBloodComponentPage = () => {
                     <Button onClick={fetchComponents} variant="secondary" className="p-2" title="Làm mới" disabled={isLoading}>
                         <RefreshCw size={18} className={isLoading ? 'animate-spin' : ''} />
                     </Button>
-                    <Button /*onClick={() => handleOpenModal()}*/ variant="primary" disabled={isLoading}> {/* Sẽ dùng khi có Modal */}
+                    <Button onClick={() => handleOpenModal()} variant="primary" disabled={isLoading}>
                         <PlusCircle size={20} className="mr-2" /> Thêm thành phần
                     </Button>
                 </div>
@@ -78,14 +93,14 @@ const AdminBloodComponentPage = () => {
                                 <tr key={comp.id} className="hover:bg-gray-50">
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{comp.id}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800">{comp.name}</td>
-                                    <td className="px-6 py-4 text-sm text-gray-700 max-w-xs truncate">{comp.description}</td>
+                                    <td className="px-6 py-4 text-sm text-gray-700 max-w-xs truncate" title={comp.description}>{comp.description}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center">{comp.shelfLifeDays}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center">
                                         {comp.storageTempMin !== null && comp.storageTempMax !== null ? `${comp.storageTempMin} - ${comp.storageTempMax}` : 'N/A'}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center">{comp.volumeMl || 'N/A'}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                                        <Button /*onClick={() => handleOpenModal(comp)}*/ variant="icon" className="text-indigo-600 hover:text-indigo-800" title="Chỉnh sửa">
+                                        <Button onClick={() => handleOpenModal(comp)} variant="icon" className="text-indigo-600 hover:text-indigo-800" title="Chỉnh sửa">
                                             <Edit3 size={18} />
                                         </Button>
                                         <Button onClick={() => handleDelete(comp.id, comp.name)} variant="icon" className="text-red-600 hover:text-red-800" title="Xóa">
@@ -98,14 +113,14 @@ const AdminBloodComponentPage = () => {
                     </table>
                 </div>
             )}
-            {/* {isModalOpen && (
+            {isModalOpen && (
                 <BloodComponentFormModal
                     isOpen={isModalOpen}
                     onClose={handleCloseModal}
-                    onSave={handleSaveComponent} // Bạn cần tạo hàm này
+                    onSaveSuccess={handleSaveSuccess}
                     component={editingComponent}
                 />
-            )} */}
+            )}
         </div>
     );
 };

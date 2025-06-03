@@ -5,13 +5,13 @@ import toast from 'react-hot-toast';
 import bloodTypeService from '../../services/bloodTypeService'; //
 import Button from '../../components/common/Button'; //
 import LoadingSpinner from '../../components/common/LoadingSpinner'; //
-// import BloodTypeFormModal from '../../components/admin/BloodTypeFormModal'; // Component này cần được tạo
+import BloodTypeFormModal from '../../components/admin/BloodTypeFormModal'; // Import the modal
 
 const AdminBloodTypePage = () => {
     const [bloodTypes, setBloodTypes] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
-    // const [isModalOpen, setIsModalOpen] = useState(false);
-    // const [editingBloodType, setEditingBloodType] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false); // State for modal
+    const [editingBloodType, setEditingBloodType] = useState(null); // State for blood type being edited
 
     const fetchBloodTypes = useCallback(async () => {
         setIsLoading(true);
@@ -29,44 +29,35 @@ const AdminBloodTypePage = () => {
         fetchBloodTypes();
     }, [fetchBloodTypes]);
 
-    // const handleOpenModal = (bloodType = null) => {
-    //     setEditingBloodType(bloodType);
-    //     setIsModalOpen(true);
-    // };
+    const handleOpenModal = (bloodType = null) => {
+        setEditingBloodType(bloodType);
+        setIsModalOpen(true);
+    };
 
-    // const handleCloseModal = () => {
-    //     setIsModalOpen(false);
-    //     setEditingBloodType(null);
-    // };
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+        setEditingBloodType(null);
+    };
 
-    // const handleSaveBloodType = async (formData) => {
-    //     const action = editingBloodType ? bloodTypeService.update : bloodTypeService.create;
-    //     const id = editingBloodType ? editingBloodType.id : null;
-    //     const toastId = toast.loading(editingBloodType ? 'Đang cập nhật...' : 'Đang tạo...');
-
-    //     try {
-    //         if (id) {
-    //             await action(id, formData);
-    //         } else {
-    //             await action(formData);
-    //         }
-    //         toast.success(editingBloodType ? 'Cập nhật thành công!' : 'Tạo thành công!', { id: toastId });
-    //         fetchBloodTypes();
-    //         handleCloseModal();
-    //     } catch (error) {
-    //         toast.error(`Lỗi: ${error.message}`, { id: toastId });
-    //     }
-    // };
+    const handleSaveSuccess = () => {
+        fetchBloodTypes();
+        handleCloseModal();
+    };
 
     const handleDelete = async (id, description) => {
         if (window.confirm(`Bạn có chắc chắn muốn xóa loại máu "${description}" (ID: ${id}) không?`)) {
             const toastId = toast.loading('Đang xóa...');
             try {
-                await bloodTypeService.delete(id); //
-                toast.success('Xóa thành công!', { id: toastId });
-                fetchBloodTypes();
+                await bloodTypeService.delete(id); // Gọi service
+                toast.success('Xóa thành công (MSW)!', { id: toastId });
+                fetchBloodTypes(); // <<< Quan trọng: Tải lại danh sách
             } catch (error) {
-                toast.error(`Lỗi khi xóa: ${error.message}`, { id: toastId });
+                // MSW handler có thể trả về lỗi 404 nếu không tìm thấy
+                if (error.response && error.response.status === 404) {
+                    toast.error(`Lỗi khi xóa: Không tìm thấy loại máu (MSW).`, { id: toastId });
+                } else {
+                    toast.error(`Lỗi khi xóa: ${error.message}`, { id: toastId });
+                }
             }
         }
     };
@@ -80,7 +71,7 @@ const AdminBloodTypePage = () => {
                     <Button onClick={fetchBloodTypes} variant="secondary" className="p-2" title="Làm mới" disabled={isLoading}>
                         <RefreshCw size={18} className={isLoading ? 'animate-spin' : ''} />
                     </Button>
-                    <Button /*onClick={() => handleOpenModal()}*/ variant="primary" disabled={isLoading}> {/* Sẽ dùng khi có Modal */}
+                    <Button onClick={() => handleOpenModal()} variant="primary" disabled={isLoading}>
                         <PlusCircle size={20} className="mr-2" /> Thêm loại máu
                     </Button>
                 </div>
@@ -115,7 +106,7 @@ const AdminBloodTypePage = () => {
                                         {new Date(bt.createdAt).toLocaleDateString()}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                                        <Button /*onClick={() => handleOpenModal(bt)}*/ variant="icon" className="text-indigo-600 hover:text-indigo-800" title="Chỉnh sửa">
+                                        <Button onClick={() => handleOpenModal(bt)} variant="icon" className="text-indigo-600 hover:text-indigo-800" title="Chỉnh sửa">
                                             <Edit3 size={18} />
                                         </Button>
                                         <Button onClick={() => handleDelete(bt.id, bt.description)} variant="icon" className="text-red-600 hover:text-red-800" title="Xóa">
@@ -128,14 +119,14 @@ const AdminBloodTypePage = () => {
                     </table>
                 </div>
             )}
-            {/* {isModalOpen && (
+            {isModalOpen && (
                 <BloodTypeFormModal
                     isOpen={isModalOpen}
                     onClose={handleCloseModal}
-                    onSave={handleSaveBloodType}
+                    onSaveSuccess={handleSaveSuccess} // Use the new handler
                     bloodType={editingBloodType}
                 />
-            )} */}
+            )}
         </div>
     );
 };
