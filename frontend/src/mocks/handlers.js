@@ -81,7 +81,7 @@ const mockRoles = [
     { id: 4, name: "Admin", description: "System admins (MSW)..." },
 ];
 
-let mockBloodTypes = [ // Đảm bảo đây là biến `let` để có thể thay đổi
+let mockBloodTypes = [
     { id: 1, bloodGroup: "A", rhFactor: "+", description: "A Positive (MSW)", createdAt: new Date().toISOString() },
     { id: 2, bloodGroup: "O", rhFactor: "-", description: "O Negative (MSW)", createdAt: new Date().toISOString() },
     { id: 3, bloodGroup: "B", rhFactor: "+", description: "B Positive (MSW)", createdAt: new Date().toISOString() },
@@ -96,7 +96,7 @@ let mockBloodComponents = [
 
 let mockCompatibilityRules = [
     { id: 1, donorBloodType: mockBloodTypes[0], recipientBloodType: mockBloodTypes[0], bloodComponent: mockBloodComponents[0], isCompatible: true, isEmergencyCompatible: false, compatibilityScore: 100, notes: "A+ to A+ (Whole Blood) is fully compatible.", createdAt: new Date().toISOString() },
-    { id: 2, donorBloodType: mockBloodTypes[1], recipientBloodType: mockBloodTypes[0], bloodComponent: mockBloodComponents[1], isCompatible: true, isEmergencyCompatible: true, compatibilityScore: 90, notes: "O- to A+ (RBC) is emergency compatible.", createdAt: new Date().toISOString() },
+    { id: 2, donorBloodType: mockBloodTypes[1], recipientBloodType: mockBloodTypes[0], bloodComponent: mockBloodComponents[1], isCompatible: true, isEmergencyCompatible: true, compatibilityScore: 80, notes: "O- to A+ (RBC) is emergency compatible.", createdAt: new Date().toISOString() },
 ];
 
 
@@ -155,41 +155,68 @@ export const handlers = [
     http.get(`${API_URL}/admin/users/:userId`, ({ params }) => {
         const { userId } = params;
         const id = parseInt(userId);
-        console.log(`MSW: Fetching user detail for ID: ${id}`); // Thêm log để kiểm tra
+        console.log(`MSW: Fetching user detail for ID: ${id}`);
 
-        // Giả sử bạn có một mảng user đầy đủ hơn hoặc một user mẫu chi tiết
+        // Bạn có thể tạo một đối tượng mock chi tiết hơn cho từng user
+        // hoặc sử dụng lại mockUser và điều chỉnh
         const detailedMockUsers = {
-            1: {
+            1: { // Dữ liệu cho user ID 1
                 id: 1,
-                fullName: "Mock User 1 Detail",
-                username: "mockuser1",
-                email: "mockuser1@example.com",
+                fullName: "Mock User 1 Detail View",
+                username: "mockuser1_detail",
+                email: "mockuser1.detail@example.com",
                 phone: "0123456789",
                 dateOfBirth: "1990-01-01",
                 gender: "Male",
-                address: "123 Mock Street, Mock City",
+                address: "123 Mock Street, Mock City, Detail",
+                latitude: 10.123,
+                longitude: 106.456,
                 emergencyContact: "Mock Emergency 0987654321",
-                bloodTypeDescription: "O Positive (Mock Detail)",
-                medicalConditions: "None for mock user 1",
+                bloodTypeDescription: "O Positive (Mock Detail)", // Đảm bảo trường này có
+                medicalConditions: "None for mock user 1 detail",
                 lastDonationDate: "2023-01-15",
                 isReadyToDonate: true,
                 role: "Member",
                 status: "Active",
                 emailVerified: true,
                 phoneVerified: false,
-                createdAt: new Date(Date.now() - 5 * 1000 * 60 * 60 * 24).toISOString(),
+                createdAt: new Date(Date.now() - 15 * 1000 * 60 * 60 * 24).toISOString(),
                 updatedAt: new Date().toISOString(),
             },
-            // Thêm các user khác nếu cần
+            // Thêm các user khác nếu cần test với ID khác
         };
 
         const foundUser = detailedMockUsers[id];
 
         if (foundUser) {
-            console.log("MSW: Found user data:", foundUser);
+            console.log("MSW: Found user data for detail view:", foundUser);
             return HttpResponse.json(foundUser);
         } else {
-            console.log(`MSW: User with ID ${id} not found.`);
+            // Lấy một user từ danh sách adminUserList nếu không có mock chi tiết riêng
+            const userList = adminUserList(0, 50).content;
+            const genericUser = userList.find(u => u && u.id === id);
+            if (genericUser) {
+                console.log("MSW: Found generic user data for detail view:", genericUser);
+                // Bổ sung các trường còn thiếu cho genericUser nếu cần thiết cho trang chi tiết
+                const detailedGenericUser = {
+                    ...genericUser,
+                    username: genericUser.username || `user${id}_generic`,
+                    phone: genericUser.phone || 'N/A',
+                    dateOfBirth: genericUser.dateOfBirth || 'N/A',
+                    gender: genericUser.gender || 'N/A',
+                    address: genericUser.address || 'N/A',
+                    latitude: genericUser.latitude || null,
+                    longitude: genericUser.longitude || null,
+                    emergencyContact: genericUser.emergencyContact || 'N/A',
+                    bloodTypeDescription: genericUser.bloodTypeDescription || 'Not Set (Mock)',
+                    medicalConditions: genericUser.medicalConditions || 'N/A',
+                    lastDonationDate: genericUser.lastDonationDate || null,
+                    isReadyToDonate: genericUser.isReadyToDonate !== undefined ? genericUser.isReadyToDonate : true,
+                    updatedAt: new Date().toISOString(),
+                };
+                return HttpResponse.json(detailedGenericUser);
+            }
+            console.log(`MSW: User with ID ${id} not found for detail view.`);
             return HttpResponse.json({ message: `User with ID ${id} not found (MSW)` }, { status: 404 });
         }
     }),
@@ -313,7 +340,6 @@ export const handlers = [
     }),
     http.post(`${API_URL}/blood-compatibility`, async ({ request }) => {
         const data = await request.json();
-        // Tìm object đầy đủ cho blood types và component nếu có
         const donorBloodType = mockBloodTypes.find(bt => bt.id === data.donorBloodTypeId);
         const recipientBloodType = mockBloodTypes.find(bt => bt.id === data.recipientBloodTypeId);
         const bloodComponent = data.bloodComponentId ? mockBloodComponents.find(bc => bc.id === data.bloodComponentId) : null;
@@ -324,11 +350,14 @@ export const handlers = [
             donorBloodType,
             recipientBloodType,
             bloodComponent,
+            compatibilityScore: parseFloat(data.compatibilityScore), // Đảm bảo là số
             createdAt: new Date().toISOString()
         };
         mockCompatibilityRules.push(newRule);
+        console.log("MSW: Created new compatibility rule", newRule);
         return HttpResponse.json(newRule, { status: 201 });
     }),
+
     http.put(`${API_URL}/blood-compatibility/:id`, async ({ request, params }) => {
         const data = await request.json();
         const index = mockCompatibilityRules.findIndex(r => r.id === parseInt(params.id));
@@ -341,8 +370,10 @@ export const handlers = [
                 ...data,
                 donorBloodType,
                 recipientBloodType,
-                bloodComponent
+                bloodComponent,
+                compatibilityScore: parseFloat(data.compatibilityScore), // Đảm bảo là số
             };
+            console.log("MSW: Updated compatibility rule", mockCompatibilityRules[index]);
             return HttpResponse.json(mockCompatibilityRules[index]);
         }
         return HttpResponse.json({ message: "Not Found" }, { status: 404 });

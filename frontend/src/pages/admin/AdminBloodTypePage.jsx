@@ -50,7 +50,7 @@ const AdminBloodTypePage = () => {
             try {
                 await bloodTypeService.delete(id); // Gọi service
                 toast.success('Xóa thành công (MSW)!', { id: toastId });
-                fetchBloodTypes(); // <<< Quan trọng: Tải lại danh sách
+                fetchBloodTypes(); 
             } catch (error) {
                 // MSW handler có thể trả về lỗi 404 nếu không tìm thấy
                 if (error.response && error.response.status === 404) {
