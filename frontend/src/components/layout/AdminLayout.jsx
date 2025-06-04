@@ -79,8 +79,6 @@ const AdminLayout = () => {
                     <Outlet />
                 </main>
             </div>
-            {/* Footer không cần thiết trong admin layout nếu không muốn */}
-            <Footer />
         </div>
     );
 };
