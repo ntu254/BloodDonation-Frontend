@@ -87,8 +87,8 @@ const BloodCompatibilityFormModal = ({ isOpen, onClose, onSaveSuccess, rule }) =
         if (formData.compatibilityScore === '' || isNaN(formData.compatibilityScore)) {
             newErrors.compatibilityScore = "Điểm tương thích phải là một số.";
         } else {
-            const score = parseFloat(formData.compatibilityScore);
-            if (score >= 0 || score <= 100) {
+            const score = partInt(formData.compatibilityScore);
+            if (score < 0 || score > 100) {
                 newErrors.compatibilityScore = "Điểm tương thích phải từ 0 đến 100";
             }
         }

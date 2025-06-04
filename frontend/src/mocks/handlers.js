@@ -95,8 +95,8 @@ let mockBloodComponents = [
 ];
 
 let mockCompatibilityRules = [
-    { id: 1, donorBloodType: mockBloodTypes[0], recipientBloodType: mockBloodTypes[0], bloodComponent: mockBloodComponents[0], isCompatible: true, isEmergencyCompatible: false, compatibilityScore: 1, notes: "A+ to A+ (Whole Blood) is fully compatible.", createdAt: new Date().toISOString() },
-    { id: 2, donorBloodType: mockBloodTypes[1], recipientBloodType: mockBloodTypes[0], bloodComponent: mockBloodComponents[1], isCompatible: true, isEmergencyCompatible: true, compatibilityScore: 0.8, notes: "O- to A+ (RBC) is emergency compatible.", createdAt: new Date().toISOString() },
+    { id: 1, donorBloodType: mockBloodTypes[0], recipientBloodType: mockBloodTypes[0], bloodComponent: mockBloodComponents[0], isCompatible: true, isEmergencyCompatible: false, compatibilityScore: 100, notes: "A+ to A+ (Whole Blood) is fully compatible.", createdAt: new Date().toISOString() },
+    { id: 2, donorBloodType: mockBloodTypes[1], recipientBloodType: mockBloodTypes[0], bloodComponent: mockBloodComponents[1], isCompatible: true, isEmergencyCompatible: true, compatibilityScore: 90, notes: "O- to A+ (RBC) is emergency compatible.", createdAt: new Date().toISOString() },
 ];
 
 
@@ -168,8 +168,6 @@ export const handlers = [
                 dateOfBirth: "1990-01-01",
                 gender: "Male",
                 address: "123 Mock Street, Mock City",
-                latitude: 10.123,
-                longitude: 106.456,
                 emergencyContact: "Mock Emergency 0987654321",
                 bloodTypeDescription: "O Positive (Mock Detail)",
                 medicalConditions: "None for mock user 1",
@@ -334,7 +332,7 @@ export const handlers = [
     http.put(`${API_URL}/blood-compatibility/:id`, async ({ request, params }) => {
         const data = await request.json();
         const index = mockCompatibilityRules.findIndex(r => r.id === parseInt(params.id));
-        if (index > -1) {
+        if (index >= 0) {
             const donorBloodType = mockBloodTypes.find(bt => bt.id === data.donorBloodTypeId);
             const recipientBloodType = mockBloodTypes.find(bt => bt.id === data.recipientBloodTypeId);
             const bloodComponent = data.bloodComponentId ? mockBloodComponents.find(bc => bc.id === data.bloodComponentId) : null;
