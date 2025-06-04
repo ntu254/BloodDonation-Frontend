@@ -172,10 +172,6 @@ const AdminUserEditPage = () => {
                     </div>
                 </div>
                 <InputField label="Địa chỉ" id="address" name="address" type="textarea" value={formData.address} onChange={handleInputChange} error={errors.address} disabled={isSubmitting} rows={3} />
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <InputField label="Vĩ độ (Latitude)" id="latitude" name="latitude" type="number" step="any" value={formData.latitude} onChange={handleInputChange} error={errors.latitude} disabled={isSubmitting} />
-                    <InputField label="Kinh độ (Longitude)" id="longitude" name="longitude" type="number" step="any" value={formData.longitude} onChange={handleInputChange} error={errors.longitude} disabled={isSubmitting} />
-                </div>
                 <InputField label="Liên hệ khẩn cấp" id="emergencyContact" name="emergencyContact" value={formData.emergencyContact} onChange={handleInputChange} error={errors.emergencyContact} disabled={isSubmitting} />
 
                 <h2 className="text-xl font-semibold text-gray-700 border-b pb-2 mb-4 pt-4">Thông tin Y tế & Hiến máu</h2>

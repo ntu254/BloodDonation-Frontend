@@ -88,8 +88,8 @@ const BloodCompatibilityFormModal = ({ isOpen, onClose, onSaveSuccess, rule }) =
             newErrors.compatibilityScore = "Điểm tương thích phải là một số.";
         } else {
             const score = parseFloat(formData.compatibilityScore);
-            if (score < -1 || score > 1) {
-                newErrors.compatibilityScore = "Điểm tương thích phải từ -1 đến 1.";
+            if (score >= 0 || score <= 100) {
+                newErrors.compatibilityScore = "Điểm tương thích phải từ 0 đến 100";
             }
         }
         setErrors(newErrors);
@@ -177,7 +177,7 @@ const BloodCompatibilityFormModal = ({ isOpen, onClose, onSaveSuccess, rule }) =
                         {errors.bloodComponentId && <p className="mt-1 text-xs text-red-600">{errors.bloodComponentId}</p>}
                     </div>
 
-                    <InputField label="Điểm tương thích (-1 đến 1)" name="compatibilityScore" type="number" step="0.1" value={formData.compatibilityScore} onChange={handleChange} required disabled={isLoading} error={errors.compatibilityScore} />
+                    <InputField label="Điểm tương thích ( 0 đến 100)" name="compatibilityScore" type="number" step="1" value={formData.compatibilityScore} onChange={handleChange} required disabled={isLoading} error={errors.compatibilityScore} />
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="flex items-center mt-2">
